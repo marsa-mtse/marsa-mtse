@@ -1,136 +1,163 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
+import numpy as np
 
-st.set_page_config(page_title="MTSE Intelligence X", layout="wide")
+# ===============================
+# PAGE CONFIG
+# ===============================
+st.set_page_config(
+    page_title="MTSE Intelligence",
+    page_icon="📊",
+    layout="wide"
+)
 
-st.title("🚀 MTSE Intelligence X")
-st.markdown("### AI Marketing & Growth Intelligence System")
+# ===============================
+# CUSTOM STYLING (Premium Dark)
+# ===============================
+st.markdown("""
+<style>
+.stApp {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+}
 
-mode = st.radio("اختر النظام", [
-    "📊 Ad Performance Intelligence",
-    "🔮 Campaign Predictor",
-    "📱 Social Growth Analyzer"
-])
+section[data-testid="stSidebar"] {
+    background-color: rgba(20, 30, 40, 0.95);
+}
 
-# ====================================================
-# 📊 AD PERFORMANCE INTELLIGENCE
-# ====================================================
+h1, h2, h3 {
+    color: #ffffff;
+}
 
-if mode == "📊 Ad Performance Intelligence":
+.stMetric {
+    background-color: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 12px;
+}
+</style>
+""", unsafe_allow_html=True)
 
-    file = st.file_uploader("Upload Ads CSV", type=["csv"])
+st.title("🚀 MTSE Intelligence Platform")
+st.markdown("### AI Marketing Analytics System")
 
-    if file:
-        df = pd.read_csv(file)
-        df.columns = df.columns.str.strip().str.lower()
+# ===============================
+# FILE UPLOAD
+# ===============================
+uploaded_file = st.file_uploader(
+    "📂 Upload Campaign CSV File",
+    type=["csv"]
+)
 
-        rename_map = {
-            "ad_name": "campaign",
-            "amount_spent": "spend",
-            "sales": "revenue"
-        }
-        df.rename(columns=rename_map, inplace=True)
+if uploaded_file:
 
-        required = ["campaign", "spend", "revenue"]
-        if not all(col in df.columns for col in required):
-            st.error("CSV must contain campaign, spend, revenue")
-            st.stop()
+    df = pd.read_csv(uploaded_file)
 
-        df["spend"] = pd.to_numeric(df["spend"], errors="coerce")
-        df["revenue"] = pd.to_numeric(df["revenue"], errors="coerce")
-        df.fillna(0, inplace=True)
+    # ===============================
+    # CLEAN COLUMN NAMES
+    # ===============================
+    df.columns = df.columns.str.strip().str.lower()
 
-        df["roas"] = np.where(df["spend"] > 0,
-                              df["revenue"] / df["spend"], 0)
+    required_cols = ["campaign", "impressions", "clicks", "spend", "revenue"]
 
-        df["profit"] = df["revenue"] - df["spend"]
+    if not all(col in df.columns for col in required_cols):
+        st.error(f"❌ CSV must contain columns: {required_cols}")
+        st.stop()
 
-        df["scale_potential"] = np.where(df["roas"] > 2,
-                                         "🔥 High Scale Potential",
-                                         np.where(df["roas"] > 1,
-                                                  "⚙️ Optimize",
-                                                  "❌ Risk"))
+    # ===============================
+    # SAFE NUMERIC CONVERSION
+    # ===============================
+    for col in ["impressions", "clicks", "spend", "revenue"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Total Spend", f"{df['spend'].sum():,.0f}")
-        col2.metric("Total Profit", f"{df['profit'].sum():,.0f}")
-        col3.metric("Avg ROAS", f"{df['roas'].mean():.2f}")
+    # ===============================
+    # AI METRICS CALCULATION
+    # ===============================
+    df["ctr"] = np.where(df["impressions"] > 0,
+                         df["clicks"] / df["impressions"], 0)
 
-        fig = px.bar(df, x="campaign", y="profit",
-                     color="scale_potential",
-                     title="Profit Intelligence")
-        st.plotly_chart(fig, use_container_width=True)
+    df["cpc"] = np.where(df["clicks"] > 0,
+                         df["spend"] / df["clicks"], 0)
 
-        st.dataframe(df.sort_values("profit", ascending=False),
-                     use_container_width=True)
+    df["roas"] = np.where(df["spend"] > 0,
+                          df["revenue"] / df["spend"], 0)
 
-# ====================================================
-# 🔮 CAMPAIGN PREDICTOR
-# ====================================================
+    # ===============================
+    # GLOBAL KPIs
+    # ===============================
+    total_spend = df["spend"].sum()
+    total_revenue = df["revenue"].sum()
+    total_clicks = df["clicks"].sum()
+    total_impressions = df["impressions"].sum()
 
-if mode == "🔮 Campaign Predictor":
+    overall_roas = total_revenue / total_spend if total_spend > 0 else 0
+    overall_ctr = total_clicks / total_impressions if total_impressions > 0 else 0
 
-    st.subheader("Predict Campaign Outcome Before Launch")
+    col1, col2, col3, col4 = st.columns(4)
 
-    budget = st.number_input("Budget", min_value=0.0)
-    expected_ctr = st.slider("Expected CTR %", 0.0, 10.0, 2.0)
-    expected_cvr = st.slider("Expected Conversion Rate %", 0.0, 20.0, 5.0)
-    avg_order = st.number_input("Average Order Value", min_value=0.0)
+    col1.metric("💰 Total Spend", f"${total_spend:,.0f}")
+    col2.metric("📈 Total Revenue", f"${total_revenue:,.0f}")
+    col3.metric("🎯 Overall ROAS", f"{overall_roas:.2f}")
+    col4.metric("📊 Overall CTR", f"{overall_ctr:.2%}")
 
-    if st.button("Predict Performance"):
+    st.divider()
 
-        clicks = budget * (expected_ctr / 100) * 10
-        conversions = clicks * (expected_cvr / 100)
-        revenue = conversions * avg_order
+    # ===============================
+    # PERFORMANCE CHARTS
+    # ===============================
+    st.subheader("📊 Revenue by Campaign")
+    fig1 = px.bar(df, x="campaign", y="revenue", color="campaign")
+    st.plotly_chart(fig1, use_container_width=True)
 
-        roas = revenue / budget if budget > 0 else 0
+    st.subheader("📊 ROAS by Campaign")
+    fig2 = px.bar(df, x="campaign", y="roas", color="campaign")
+    st.plotly_chart(fig2, use_container_width=True)
 
-        risk = "Low Risk" if roas > 2 else \
-               "Medium Risk" if roas > 1 else \
-               "High Risk"
+    st.subheader("📊 CTR by Campaign")
+    fig3 = px.bar(df, x="campaign", y="ctr", color="campaign")
+    st.plotly_chart(fig3, use_container_width=True)
 
-        st.metric("Predicted Revenue", f"{revenue:,.0f}")
-        st.metric("Predicted ROAS", f"{roas:.2f}")
-        st.metric("Risk Level", risk)
+    st.divider()
 
-# ====================================================
-# 📱 SOCIAL GROWTH ANALYZER
-# ====================================================
+    # ===============================
+    # AI SMART ANALYSIS
+    # ===============================
+    st.subheader("🤖 AI Strategic Insights")
 
-if mode == "📱 Social Growth Analyzer":
+    best_roas_campaign = df.loc[df["roas"].idxmax()]
+    worst_roas_campaign = df.loc[df["roas"].idxmin()]
 
-    file = st.file_uploader("Upload Social Insights CSV", type=["csv"])
+    st.success(
+        f"🔥 Best Campaign: {best_roas_campaign['campaign']} "
+        f"(ROAS: {best_roas_campaign['roas']:.2f})"
+    )
 
-    if file:
-        df = pd.read_csv(file)
-        df.columns = df.columns.str.strip().str.lower()
+    st.warning(
+        f"⚠ Weak Campaign: {worst_roas_campaign['campaign']} "
+        f"(ROAS: {worst_roas_campaign['roas']:.2f})"
+    )
 
-        required = ["likes", "comments", "shares", "reach"]
-        if not all(col in df.columns for col in required):
-            st.error("CSV must contain likes, comments, shares, reach")
-            st.stop()
+    # Budget Optimization Suggestion
+    high_performers = df[df["roas"] > overall_roas]
 
-        df.fillna(0, inplace=True)
+    if not high_performers.empty:
+        recommended_budget_shift = high_performers["campaign"].tolist()
+        st.info(
+            f"📌 Recommendation: Shift more budget toward: {recommended_budget_shift}"
+        )
 
-        df["engagement"] = df["likes"] + df["comments"] + df["shares"]
-        df["engagement_rate"] = df["engagement"] / df["reach"]
+    # ===============================
+    # DOWNLOAD REPORT
+    # ===============================
+    st.subheader("📥 Download Enhanced Report")
 
-        avg_eng = df["engagement_rate"].mean()
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        "Download Full Analysis CSV",
+        csv,
+        "mtse_analysis_report.csv",
+        "text/csv"
+    )
 
-        if avg_eng > 0.06:
-            verdict = "🔥 Viral Page"
-        elif avg_eng > 0.04:
-            verdict = "🚀 Strong Growth"
-        elif avg_eng > 0.02:
-            verdict = "⚙ Needs Better Hooks"
-        else:
-            verdict = "❌ Weak Content Strategy"
-
-        st.metric("Avg Engagement Rate", f"{avg_eng:.2%}")
-        st.info(verdict)
-
-        fig = px.line(df, y="engagement_rate",
-                      title="Engagement Trend")
-        st.plotly_chart(fig, use_container_width=True)
+else:
+    st.info("Upload a CSV file to begin analysis.")
