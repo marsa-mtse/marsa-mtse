@@ -1,3 +1,79 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import numpy as np
+
+# ===============================
+# CONFIG
+# ===============================
+st.set_page_config(page_title="MTSE Intelligence", layout="wide")
+
+# ===============================
+# CLEAN PREMIUM BACKGROUND
+# ===============================
+st.markdown("""
+<style>
+.stApp {
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color: white;
+}
+
+h1, h2, h3 {
+    color: #f8fafc !important;
+}
+
+.stMetric {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 12px;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: #0f172a;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ===============================
+# LANGUAGE
+# ===============================
+lang = st.sidebar.selectbox("Language / اللغة", ["English", "العربية"])
+
+def T(en, ar):
+    return en if lang == "English" else ar
+
+# ===============================
+# LOGIN SYSTEM
+# ===============================
+if "auth" not in st.session_state:
+    st.session_state.auth = False
+
+st.sidebar.title(T("Login","تسجيل الدخول"))
+
+user = st.sidebar.text_input("Username")
+pwd = st.sidebar.text_input("Password", type="password")
+
+if st.sidebar.button(T("Login","دخول")):
+    if user == "admin" and pwd == "mtse123":
+        st.session_state.auth = True
+    else:
+        st.sidebar.error(T("Wrong credentials","بيانات غير صحيحة"))
+
+if not st.session_state.auth:
+    st.warning(T("Please login first","يرجى تسجيل الدخول"))
+    st.stop()
+
+# ===============================
+# HEADER
+# ===============================
+st.title("🚀 MTSE Intelligence Platform")
+st.markdown("### AI Marketing & Social Media Analytics")
+
+# ===============================
+# FILE UPLOAD
+# ===============================
+uploaded = st.file_uploader(T("Upload CSV File","ارفع ملف CSV"), type=["csv"])
+
 if uploaded:
 
     df = pd.read_csv(uploaded)
