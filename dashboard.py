@@ -1,143 +1,186 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import numpy as np
+import sqlite3
 import hashlib
+from sklearn.linear_model import LinearRegression
 from fpdf import FPDF
 
-st.set_page_config(page_title="MTSE Analytics", layout="wide")
+# =========================================
+# DATABASE SETUP
+# =========================================
+conn = sqlite3.connect("mtse.db", check_same_thread=False)
+c = conn.cursor()
 
-# -------------------- STYLE --------------------
+c.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY,
+    password TEXT,
+    plan TEXT
+)
+""")
+conn.commit()
+
+# =========================================
+# PAGE CONFIG
+# =========================================
+st.set_page_config(page_title="MTSE Analytics Pro", layout="wide")
 
 st.markdown("""
 <style>
-.stApp {
-    background-color: #F4F1EA;
-}
-
-h1, h2, h3 {
-    color: #2E2E2E;
-}
-
-.metric-card {
-    background: #FFFFFF;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.sidebar .sidebar-content {
-    background-color: #ECE8DF;
+body {background-color:#F4F1EA;}
+h1,h2,h3 {color:#2C2C2C;}
+.stButton>button {
+background-color:#A68A64;
+color:white;
+border-radius:8px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------- LOGIN SYSTEM --------------------
+# =========================================
+# AUTH FUNCTIONS
+# =========================================
+def hash_password(p):
+    return hashlib.sha256(p.encode()).hexdigest()
 
-users = {
-    "admin": hashlib.sha256("mtse123".encode()).hexdigest()
-}
+def register_user(u, p, plan):
+    try:
+        c.execute("INSERT INTO users VALUES (?, ?, ?)",
+                  (u, hash_password(p), plan))
+        conn.commit()
+        return True
+    except:
+        return False
 
+def login_user(u, p):
+    c.execute("SELECT * FROM users WHERE username=? AND password=?",
+              (u, hash_password(p)))
+    return c.fetchone()
+
+# =========================================
+# AUTH UI
+# =========================================
 if "logged" not in st.session_state:
     st.session_state.logged = False
 
+menu = st.sidebar.selectbox("الحساب", ["تسجيل دخول", "إنشاء حساب"])
+
 if not st.session_state.logged:
 
-    st.sidebar.title("تسجيل الدخول")
+    if menu == "إنشاء حساب":
+        st.title("إنشاء حساب جديد")
+        u = st.text_input("اسم المستخدم")
+        p = st.text_input("كلمة المرور", type="password")
+        plan = st.selectbox("اختر الباقة", ["Starter", "Pro", "Business"])
 
-    username = st.sidebar.text_input("اسم المستخدم")
-    password = st.sidebar.text_input("كلمة المرور", type="password")
+        if st.button("تسجيل"):
+            if register_user(u, p, plan):
+                st.success("تم إنشاء الحساب")
+            else:
+                st.error("اسم مستخدم موجود")
 
-    if st.sidebar.button("دخول"):
-        hashed = hashlib.sha256(password.encode()).hexdigest()
-        if username in users and users[username] == hashed:
-            st.session_state.logged = True
-            st.success("تم تسجيل الدخول")
-        else:
-            st.error("بيانات غير صحيحة")
+    if menu == "تسجيل دخول":
+        st.title("تسجيل الدخول")
+        u = st.text_input("اسم المستخدم")
+        p = st.text_input("كلمة المرور", type="password")
 
-# -------------------- MAIN DASHBOARD --------------------
+        if st.button("دخول"):
+            user = login_user(u, p)
+            if user:
+                st.session_state.logged = True
+                st.session_state.username = user[0]
+                st.session_state.plan = user[2]
+                st.success("تم تسجيل الدخول")
+            else:
+                st.error("بيانات غير صحيحة")
 
-if st.session_state.logged:
+    st.stop()
 
-    st.title("MTSE Analytics")
-    st.subheader("منصة تحليل البيانات واتخاذ القرار التسويقي")
+# =========================================
+# MAIN APP
+# =========================================
+st.title("MTSE Analytics Pro")
+st.write(f"مرحبًا {st.session_state.username} | الباقة: {st.session_state.plan}")
 
-    uploaded_file = st.file_uploader("رفع ملف CSV", type=["csv"])
+uploaded = st.file_uploader("ارفع ملف CSV")
 
-    if uploaded_file:
-        df = pd.read_csv(uploaded_file)
+if uploaded:
+    df = pd.read_csv(uploaded)
+    df.columns = df.columns.str.lower().str.strip()
 
-        required = ["campaign","impressions","clicks","spend","revenue"]
+    numeric_cols = df.select_dtypes(include=np.number).columns
 
-        if not all(col in df.columns for col in required):
-            st.error("الملف يجب أن يحتوي على الأعمدة: campaign, impressions, clicks, spend, revenue")
-        else:
+    st.subheader("نظرة عامة")
+    st.dataframe(df.head())
 
-            df["CTR"] = df["clicks"] / df["impressions"]
-            df["CPC"] = df["spend"] / df["clicks"]
-            df["ROAS"] = df["revenue"] / df["spend"]
+    col1,col2,col3 = st.columns(3)
+    col1.metric("عدد الصفوف", len(df))
+    col2.metric("عدد الأعمدة", len(df.columns))
+    col3.metric("أعمدة رقمية", len(numeric_cols))
 
-            total_spend = df["spend"].sum()
-            total_revenue = df["revenue"].sum()
-            avg_roas = df["ROAS"].mean()
+    # =====================================
+    # PLAN CONTROL
+    # =====================================
+    if st.session_state.plan in ["Pro", "Business"]:
 
-            col1, col2, col3 = st.columns(3)
+        st.subheader("تحليل متقدم")
 
-            col1.metric("إجمالي الإنفاق", f"{total_spend:,.0f} جنيه")
-            col2.metric("إجمالي الإيراد", f"{total_revenue:,.0f} جنيه")
-            col3.metric("متوسط ROAS", f"{avg_roas:.2f}")
+        if len(numeric_cols) > 0:
+            metric = st.selectbox("اختر مؤشر", numeric_cols)
 
-            best = df.sort_values("ROAS", ascending=False).iloc[0]
-            worst = df.sort_values("ROAS").iloc[0]
+            st.metric("متوسط", round(df[metric].mean(),2))
 
-            st.success(f"أفضل حملة: {best['campaign']}")
-
-            if worst["ROAS"] < 1:
-                st.warning(f"تحتاج تحسين: {worst['campaign']}")
-
-            fig = px.bar(df, x="campaign", y="revenue", title="الإيراد حسب الحملة")
+            fig = px.line(df, y=metric)
             st.plotly_chart(fig, use_container_width=True)
 
-            # PDF
-            if st.button("تحميل تقرير PDF"):
-                pdf = FPDF()
-                pdf.add_page()
-                pdf.set_font("Arial", size=12)
-                pdf.cell(200, 10, txt="MTSE Analytics Report", ln=True)
-                pdf.cell(200, 10, txt=f"Total Spend: {total_spend}", ln=True)
-                pdf.cell(200, 10, txt=f"Total Revenue: {total_revenue}", ln=True)
-                pdf.output("report.pdf")
+    if st.session_state.plan == "Business":
 
-                with open("report.pdf", "rb") as f:
-                    st.download_button("اضغط لتحميل التقرير", f, file_name="report.pdf")
+        st.subheader("التوقعات المستقبلية")
 
-    # ---------------- PRICING ----------------
+        if len(numeric_cols) > 0:
+            target = st.selectbox("اختر عمود للتوقع", numeric_cols)
 
+            df["index"] = range(len(df))
+            X = df[["index"]]
+            y = df[target]
+
+            model = LinearRegression()
+            model.fit(X, y)
+
+            future = np.array(range(len(df)+5)).reshape(-1,1)
+            pred = model.predict(future)
+
+            fig = px.line(y=pred, title="Forecast")
+            st.plotly_chart(fig)
+
+    # =====================================
+    # PDF FOR ALL
+    # =====================================
+    if st.button("تحميل تقرير PDF"):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200,10, txt="MTSE Analytics Report", ln=True)
+
+        for col in numeric_cols:
+            pdf.cell(200,10, txt=f"{col} Avg: {round(df[col].mean(),2)}", ln=True)
+
+        pdf.output("report.pdf")
+
+        with open("report.pdf","rb") as f:
+            st.download_button("تحميل", f, "MTSE_Report.pdf")
+
+# =========================================
+# ADMIN PANEL
+# =========================================
+if st.session_state.username == "admin":
     st.markdown("---")
-    st.header("الباقات")
+    st.subheader("لوحة تحكم المدير")
 
-    col1, col2, col3 = st.columns(3)
+    c.execute("SELECT username, plan FROM users")
+    users_data = c.fetchall()
 
-    with col1:
-        st.markdown("### Starter")
-        st.write("499 جنيه / شهر")
-        st.write("تحليل أساسي + رفع CSV")
-
-    with col2:
-        st.markdown("### Pro")
-        st.write("1499 جنيه / شهر")
-        st.write("تحليل ذكي + تقارير + PDF")
-
-    with col3:
-        st.markdown("### Enterprise")
-        st.write("حسب الاتفاق")
-        st.write("API + حسابات متعددة + دعم خاص")
-
-    # ---------------- CONTACT ----------------
-
-    st.markdown("---")
-    st.header("تواصل معنا")
-
-    st.write("📧 marsatouch@gmail.com")
-    st.write("📱 WhatsApp:")
-    st.write("https://chat.whatsapp.com/BepZmZWVy01EFmU6vrhjo1")
+    admin_df = pd.DataFrame(users_data, columns=["Username","Plan"])
+    st.dataframe(admin_df)
