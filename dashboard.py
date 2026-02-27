@@ -373,6 +373,12 @@ else:
 # MARKETING STRATEGY GENERATOR
 # ===================================
 
+
+
+# ===================================
+# MARKETING STRATEGY GENERATOR
+# ===================================
+
 st.markdown("---")
 st.header("Marketing Strategy Generator")
 
@@ -395,6 +401,25 @@ elif "impressions" in df.columns and "clicks" in df.columns:
 
 elif "sessions" in df.columns:
     strategy_output += "- Focus on improving conversion rate and landing page optimization.\n"
+
+else:
+    strategy_output += "- General dataset detected. Focus on trend analysis and optimization.\n"
+
+st.text_area("Strategic Recommendations", strategy_output, height=200)
+
+
+
+# ===================================
+# SMART STRATEGY ASSISTANT
+# ===================================
+
+st.markdown("---")
+st.header("Smart Strategy Assistant")
+
+user_question = st.text_input("Ask about your data", key="chat_input")
+
+if user_question:
+    st.info("AI assistant feature will be connected to OpenAI soon.")
 
         # ==============================
         # STRATEGY GENERATOR ENGINE
@@ -1193,6 +1218,7 @@ button {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 
