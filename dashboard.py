@@ -8,7 +8,8 @@ import sqlite3
 import hashlib
 import datetime
 import io
-
+import arabic_reshaper
+from bidi.algorithm import get_display
 # ==============================
 # CONFIG
 # ==============================
@@ -1199,6 +1200,7 @@ button {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 
