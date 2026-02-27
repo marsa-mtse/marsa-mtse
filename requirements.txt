@@ -10,3 +10,4 @@ python-docx
 pdfplumber
 openpyxl
 openai
+stripe
