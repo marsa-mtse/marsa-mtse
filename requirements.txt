@@ -11,3 +11,5 @@ pdfplumber
 openpyxl
 openai
 stripe
+arabic-reshaper
+python-bidi
