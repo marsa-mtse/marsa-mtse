@@ -426,26 +426,7 @@ if user_question:
         # ==============================
 
        
-        st.markdown("---")
-        st.header("Smart Strategy Assistant")
-
-        user_question = st.text_input("Ask about your data")
-
-        if user_question:
-
-            response = ""
-
-            if "roas" in user_question.lower() and "ROAS" in df.columns:
-                response = f"Average ROAS is {round(df['ROAS'].mean(),2)}"
-
-            elif "best" in user_question.lower() and len(numeric_cols) > 0:
-                best_col = numeric_cols[0]
-                response = f"Highest average metric is {best_col}"
-
-            else:
-                response = "Based on current analysis, optimization should focus on trend and ROI improvement."
-
-            st.success(response)
+        
             # ==========================================================
 # PART 3 – ENTERPRISE PDF ENGINE PRO
 # ==========================================================
@@ -1218,6 +1199,7 @@ button {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 
