@@ -381,16 +381,18 @@ else:
 
         if dataset_type == "Paid Ads Data" and "revenue" in columns and "spend" in columns:
 
-            df["ROAS"] = df["revenue"] / df["spend"]
-            avg_roas = df["ROAS"].mean()
+            if "revenue" in df.columns and "spend" in df.columns:
+    df["ROAS"] = df["revenue"] / df["spend"]
+    avg_roas = df["ROAS"].mean()
 
-            if avg_roas < 1:
-                strategy_output += "• Current ROAS is below profitability. Reallocate budget and improve creatives.\n"
-            elif avg_roas < 2:
-                strategy_output += "• Moderate ROAS. Focus on scaling best-performing campaigns.\n"
-            else:
-                strategy_output += "• Strong ROAS. Increase budget allocation strategically.\n"
-
+    if avg_roas < 1:
+        strategy_output += "- Current ROAS is below profitability. Reallocate budget and improve creatives.\n"
+    elif avg_roas < 2:
+        strategy_output += "- Moderate ROAS. Focus on scaling best-performing campaigns.\n"
+    else:
+        strategy_output += "- Strong ROAS. Increase budget allocation strategically.\n"
+else:
+    strategy_output += "- Revenue/Spend columns not found. ROAS analysis skipped.\n"
         if dataset_type == "Organic Social Data":
             strategy_output += "• Optimize engagement by improving content hooks and call-to-actions.\n"
 
@@ -1198,4 +1200,5 @@ button {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
