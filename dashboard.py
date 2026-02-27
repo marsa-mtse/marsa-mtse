@@ -457,7 +457,7 @@ from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.units import inch
 import base64
-
+from reportlab.pdfbase.ttfonts import TTFont
 # ==============================
 # REPORT LANGUAGE MODE
 # ==============================
@@ -470,10 +470,22 @@ report_language = st.selectbox(
     ["Arabic Only", "English Only", "Arabic + English"]
 )
 
+def format_arabic(text):
+    reshaped_text = arabic_reshaper.reshape(text)
+    return get_display(reshaped_text)
 def generate_enterprise_pdf(df=None, strategy_text="", username="User", filename="File"):
-
+pdfmetrics.registerFont(TTFont('Amiri', 'Amiri-Regular.ttf'))
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
+styles = getSampleStyleSheet()
+
+arabic_style = ParagraphStyle(
+    'ArabicStyle',
+    parent=styles['Normal'],
+    fontName='Amiri',
+    fontSize=12,
+    leading=18,
+    alignment=2
+ doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
 
     styles = getSampleStyleSheet()
@@ -1254,6 +1266,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
