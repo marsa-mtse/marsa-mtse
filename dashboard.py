@@ -369,19 +369,17 @@ else:
             future = model.predict([[len(df)]])[0][0]
 
             st.success(f"Next Predicted Value: {round(float(future),2)}")
+# ===================================
+# MARKETING STRATEGY GENERATOR
+# ===================================
 
-        # ==============================
-        # STRATEGY GENERATOR ENGINE
-        # ==============================
+st.markdown("---")
+st.header("Marketing Strategy Generator")
 
-        st.markdown("---")
-        st.header("Marketing Strategy Generator")
+strategy_output = ""
 
-        strategy_output = ""
+if "revenue" in df.columns and "spend" in df.columns:
 
-        if dataset_type == "Paid Ads Data" and "revenue" in columns and "spend" in columns:
-
-            if "revenue" in df.columns and "spend" in df.columns:
     df["ROAS"] = df["revenue"] / df["spend"]
     avg_roas = df["ROAS"].mean()
 
@@ -391,23 +389,18 @@ else:
         strategy_output += "- Moderate ROAS. Focus on scaling best-performing campaigns.\n"
     else:
         strategy_output += "- Strong ROAS. Increase budget allocation strategically.\n"
-else:
-    strategy_output += "- Revenue/Spend columns not found. ROAS analysis skipped.\n"
-        if dataset_type == "Organic Social Data":
-            strategy_output += "• Optimize engagement by improving content hooks and call-to-actions.\n"
 
-        if dataset_type == "SEO Data":
-            strategy_output += "• Focus on low competition keywords with high search volume.\n"
+elif "impressions" in df.columns and "clicks" in df.columns:
+    strategy_output += "- Improve CTR by testing stronger hooks and creatives.\n"
 
-        if strategy_output == "":
-            strategy_output = "• General data detected. Focus on trend analysis and optimization."
-
-        st.text_area("Strategic Recommendations", strategy_output, height=200)
+elif "sessions" in df.columns:
+    strategy_output += "- Focus on improving conversion rate and landing page optimization.\n"
 
         # ==============================
-        # SMART AI CHATBOT (DATA-AWARE)
+        # STRATEGY GENERATOR ENGINE
         # ==============================
 
+       
         st.markdown("---")
         st.header("Smart Strategy Assistant")
 
@@ -1200,5 +1193,6 @@ button {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
