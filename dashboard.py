@@ -398,27 +398,31 @@ st.header("Marketing Strategy Generator")
 
 strategy_output = ""
 
-if "revenue" in df.columns and "spend" in df.columns:
+if "df" in locals():
 
-    df["ROAS"] = df["revenue"] / df["spend"]
-    avg_roas = df["ROAS"].mean()
+    if all(col in df.columns for col in ["revenue", "spend"]):
 
-    if avg_roas < 1:
-        strategy_output += "- Current ROAS is below profitability. Reallocate budget and improve creatives.\n"
-    elif avg_roas < 2:
-        strategy_output += "- Moderate ROAS. Focus on scaling best-performing campaigns.\n"
+        df["ROAS"] = df["revenue"] / df["spend"]
+        avg_roas = df["ROAS"].mean()
+
+        if avg_roas < 1:
+            strategy_output += "- Current ROAS is below profitability. Reallocate budget and improve creatives.\n"
+        elif avg_roas < 2:
+            strategy_output += "- Moderate ROAS. Focus on scaling best-performing campaigns.\n"
+        else:
+            strategy_output += "- Strong ROAS. Increase budget allocation strategically.\n"
+
+    elif all(col in df.columns for col in ["impressions", "clicks"]):
+        strategy_output += "- Improve CTR by testing stronger hooks and creatives.\n"
+
+    elif "sessions" in df.columns:
+        strategy_output += "- Focus on improving conversion rate and landing page optimization.\n"
+
     else:
-        strategy_output += "- Strong ROAS. Increase budget allocation strategically.\n"
-
-elif "impressions" in df.columns and "clicks" in df.columns:
-    strategy_output += "- Improve CTR by testing stronger hooks and creatives.\n"
-
-elif "sessions" in df.columns:
-    strategy_output += "- Focus on improving conversion rate and landing page optimization.\n"
+        strategy_output += "- Data structure recognized but needs deeper analysis.\n"
 
 else:
-    strategy_output += "- General dataset detected. Focus on trend analysis and optimization.\n"
-
+    strategy_output += "- No dataset detected for analysis.\n"
 st.text_area("Strategic Recommendations", strategy_output, height=200)
 
 
@@ -1250,6 +1254,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
