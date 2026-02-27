@@ -474,8 +474,8 @@ def format_arabic(text):
     reshaped_text = arabic_reshaper.reshape(text)
     return get_display(reshaped_text)
 def generate_enterprise_pdf(df=None, strategy_text="", username="User", filename="File"):
-pdfmetrics.registerFont(TTFont('Amiri', 'Amiri-Regular.ttf'))
-    buffer = io.BytesIO()
+    pdfmetrics.registerFont(TTFont('Amiri', 'Amiri-Regular.ttf'))
+   buffer = io.BytesIO()
 styles = getSampleStyleSheet()
 
 arabic_style = ParagraphStyle(
@@ -488,18 +488,8 @@ arabic_style = ParagraphStyle(
  doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
 
-    styles = getSampleStyleSheet()
-
-    # Register Unicode font
-    pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
-
-    english_style = styles["Normal"]
-    arabic_style = ParagraphStyle(
-        name="ArabicStyle",
-        parent=styles["Normal"],
-        fontName="STSong-Light",
-        fontSize=12
-    )
+    
+       
 
     # ==============================
     # COVER
@@ -1266,6 +1256,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
