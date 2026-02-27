@@ -1,6 +1,11 @@
 streamlit
 pandas
 plotly
-reportlab
 scikit-learn
+reportlab
 numpy
+qrcode
+Pillow
+python-docx
+pdfplumber
+openpyxl
