@@ -9,3 +9,4 @@ Pillow
 python-docx
 pdfplumber
 openpyxl
+openai
