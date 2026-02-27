@@ -5,219 +5,216 @@ import sqlite3
 import hashlib
 import numpy as np
 import io
-from datetime import datetime
 from sklearn.linear_model import LinearRegression
-from fpdf import FPDF
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
 
-# ================= CONFIG =================
+# -------------------------------------------------
+# CONFIG
+# -------------------------------------------------
+
 st.set_page_config(page_title="MTSE Analytics", layout="wide")
 
-# ================= DATABASE =================
-conn = sqlite3.connect("mtse_users.db", check_same_thread=False)
+PLATFORM_NAME = "MTSE Analytics"
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "admin@2026"
+
+# -------------------------------------------------
+# DATABASE
+# -------------------------------------------------
+
+conn = sqlite3.connect("users.db", check_same_thread=False)
 c = conn.cursor()
 
 c.execute("""
 CREATE TABLE IF NOT EXISTS users(
-username TEXT PRIMARY KEY,
-password TEXT,
-role TEXT
+    username TEXT PRIMARY KEY,
+    password TEXT,
+    role TEXT
 )
 """)
-
 conn.commit()
 
-# Default Admin
-admin_user = "admin"
-admin_pass = hashlib.sha256("admin@2026".encode()).hexdigest()
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
-c.execute("SELECT * FROM users WHERE username=?", (admin_user,))
+# إنشاء الادمن لو مش موجود
+c.execute("SELECT * FROM users WHERE username=?", (ADMIN_USERNAME,))
 if not c.fetchone():
-    c.execute("INSERT INTO users VALUES (?,?,?)",
-              (admin_user, admin_pass, "admin"))
+    c.execute("INSERT INTO users VALUES (?, ?, ?)",
+              (ADMIN_USERNAME, hash_password(ADMIN_PASSWORD), "admin"))
     conn.commit()
 
-# ================= LANGUAGE =================
-lang = st.sidebar.selectbox("Language / اللغة", ["English", "العربية"])
+# -------------------------------------------------
+# LANGUAGE
+# -------------------------------------------------
 
-def t(en, ar):
-    return en if lang == "English" else ar
+language = st.sidebar.selectbox("Language / اللغة", ["English", "العربية"])
 
-# ================= WATERMARK =================
-st.markdown("""
-<style>
-.watermark {
-position: fixed;
-top: 40%;
-left: 30%;
-opacity: 0.05;
-font-size: 80px;
-transform: rotate(-30deg);
-z-index: -1;
-}
-</style>
-<div class="watermark">MTSE Analytics</div>
-""", unsafe_allow_html=True)
+def tr(en, ar):
+    return en if language == "English" else ar
 
-# ================= LOGIN =================
-if "user" not in st.session_state:
-    st.session_state.user = None
+# -------------------------------------------------
+# LOGIN SYSTEM
+# -------------------------------------------------
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
     st.session_state.role = None
+    st.session_state.user = None
 
-def hash_pass(p):
-    return hashlib.sha256(p.encode()).hexdigest()
+if not st.session_state.logged_in:
 
-if not st.session_state.user:
+    st.title("Login")
 
-    st.title("📊 MTSE Analytics")
-    st.subheader(t("Data & Marketing Analytics Platform",
-                   "منصة تحليل البيانات واتخاذ القرار"))
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
 
-    menu = st.radio("", [t("Login", "تسجيل الدخول"),
-                         t("Create Account", "إنشاء حساب")])
+    if st.button("Login"):
+        c.execute("SELECT * FROM users WHERE username=?", (username,))
+        user = c.fetchone()
 
-    if menu == t("Login", "تسجيل الدخول"):
-        u = st.text_input(t("Username", "اسم المستخدم"))
-        p = st.text_input(t("Password", "كلمة المرور"), type="password")
+        if user and user[1] == hash_password(password):
+            st.session_state.logged_in = True
+            st.session_state.role = user[2]
+            st.session_state.user = username
+            st.success("Logged in successfully")
+            st.rerun()
+        else:
+            st.error("Wrong Credentials")
 
-        if st.button(t("Login", "دخول")):
-            c.execute("SELECT * FROM users WHERE username=? AND password=?",
-                      (u, hash_pass(p)))
-            result = c.fetchone()
-            if result:
-                st.session_state.user = u
-                st.session_state.role = result[2]
-                st.rerun()
-            else:
-                st.error(t("Wrong Credentials", "بيانات غير صحيحة"))
+    st.markdown("---")
+    st.subheader("Create Account")
 
-    else:
-        new_u = st.text_input(t("New Username", "اسم مستخدم جديد"))
-        new_p = st.text_input(t("New Password", "كلمة مرور جديدة"),
-                              type="password")
+    new_user = st.text_input("New Username")
+    new_pass = st.text_input("New Password", type="password")
 
-        if st.button(t("Create", "إنشاء")):
+    if st.button("Create Account"):
+        if new_user and new_pass:
             try:
-                c.execute("INSERT INTO users VALUES (?,?,?)",
-                          (new_u, hash_pass(new_p), "user"))
+                c.execute("INSERT INTO users VALUES (?, ?, ?)",
+                          (new_user, hash_password(new_pass), "user"))
                 conn.commit()
-                st.success(t("Account Created", "تم إنشاء الحساب"))
+                st.success("Account Created")
             except:
-                st.error(t("Username Exists", "اسم المستخدم موجود"))
+                st.error("User already exists")
 
-# ================= DASHBOARD =================
-else:
+    st.stop()
 
-    st.success(t("Welcome", "مرحباً") + f" {st.session_state.user}")
+# -------------------------------------------------
+# MAIN APP
+# -------------------------------------------------
 
-    uploaded = st.file_uploader(
-        t("Upload CSV File", "ارفع ملف CSV"),
-        type=["csv"]
-    )
+st.title(PLATFORM_NAME)
+st.write(tr("Data & Marketing Analytics Platform",
+            "منصة تحليل البيانات واتخاذ القرار التسويقي"))
 
-    if uploaded:
+st.success(f"Welcome {st.session_state.user}")
 
-        df = pd.read_csv(uploaded)
-        st.dataframe(df.head())
+uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
-        numeric_cols = df.select_dtypes(include=np.number).columns
+if uploaded_file:
 
-        # ================= AUTO ANALYSIS =================
-        st.header(t("Automatic Data Analysis",
-                    "تحليل البيانات التلقائي"))
+    df = pd.read_csv(uploaded_file)
+    st.dataframe(df)
+
+    numeric_cols = df.select_dtypes(include=np.number).columns
+
+    if len(numeric_cols) > 0:
+
+        st.header(tr("Automatic Data Analysis", "تحليل البيانات التلقائي"))
 
         for col in numeric_cols:
-            fig = px.line(df, y=col, title=col)
-            st.plotly_chart(fig, use_container_width=True)
+            st.metric(f"{col} Mean", round(df[col].mean(),2))
 
-        # ================= AI Prediction =================
-        if len(numeric_cols) > 0:
-            col = numeric_cols[0]
-            X = np.arange(len(df)).reshape(-1, 1)
-            y = df[col].values
+        fig = px.line(df[numeric_cols])
+        st.plotly_chart(fig, use_container_width=True)
 
-            model = LinearRegression()
-            model.fit(X, y)
+        # -------------------------
+        # AI TREND PREDICTION
+        # -------------------------
 
-            future = model.predict([[len(df)]])[0]
+        st.header("AI Trend Prediction")
 
-            st.subheader(t("AI Prediction",
-                           "توقعات الذكاء الاصطناعي"))
+        col_to_predict = st.selectbox("Select Column", numeric_cols)
 
-            st.write(
-                t("Next Predicted Value:",
-                  "القيمة المتوقعة القادمة:"),
-                round(float(future), 2)
-            )
+        X = np.arange(len(df)).reshape(-1,1)
+        y = df[col_to_predict].values.reshape(-1,1)
 
-        # ================= BOT INSIGHT =================
-        st.subheader("AI Insight Bot 🤖")
+        model = LinearRegression()
+        model.fit(X, y)
 
-        if st.button(t("Generate Insights",
-                       "توليد استنتاجات ذكية")):
+        future = model.predict([[len(df)]])[0][0]
 
-            summary = df.describe().to_string()
-            st.text(summary)
+        st.write("Next Predicted Value:", round(float(future),2))
 
-        # ================= PROFESSIONAL PDF =================
-        if st.button(t("Generate Enterprise Report",
-                       "إنشاء تقرير احترافي")):
+        # -------------------------
+        # AI INSIGHT BOT
+        # -------------------------
 
-            pdf = FPDF()
-            pdf.add_page()
+        st.header("AI Insight Bot")
 
-            pdf.set_font("Arial", "B", 20)
-            pdf.cell(200, 15, "MTSE Analytics Report", ln=True, align="C")
-
-            pdf.set_font("Arial", "", 12)
-            pdf.cell(200, 8,
-                     f"User: {st.session_state.user}",
-                     ln=True)
-            pdf.cell(200, 8,
-                     f"File: {uploaded.name}",
-                     ln=True)
-            pdf.cell(200, 8,
-                     f"Date: {datetime.now().strftime('%Y-%m-%d')}",
-                     ln=True)
-
-            pdf.ln(10)
-            pdf.set_font("Arial", "B", 14)
-            pdf.cell(200, 10, "Data Summary", ln=True)
-
-            pdf.set_font("Arial", "", 12)
+        if st.button("Generate Insights"):
+            insights = []
             for col in numeric_cols:
-                pdf.cell(
-                    200, 8,
-                    f"{col} Avg: {round(df[col].mean(),2)}",
-                    ln=True
-                )
+                mean = df[col].mean()
+                insights.append(f"{col} average is {round(mean,2)}")
 
-            pdf.ln(10)
-            pdf.cell(
-                200, 10,
-                "Generated by MTSE Analytics Platform",
-                ln=True, align="C"
-            )
+            for i in insights:
+                st.write(i)
+
+        # -------------------------
+        # PDF REPORT
+        # -------------------------
+
+        def generate_pdf(df, filename):
 
             buffer = io.BytesIO()
-            pdf.output(buffer)
+            doc = SimpleDocTemplate(buffer, pagesize=A4)
+            elements = []
+            styles = getSampleStyleSheet()
+
+            elements.append(Paragraph(PLATFORM_NAME + " Report", styles["Heading1"]))
+            elements.append(Spacer(1,20))
+            elements.append(Paragraph(f"Analyzed File: {filename}", styles["Normal"]))
+            elements.append(Spacer(1,20))
+
+            for col in numeric_cols:
+                elements.append(
+                    Paragraph(f"{col} Mean: {round(df[col].mean(),2)}",
+                              styles["Normal"])
+                )
+                elements.append(Spacer(1,10))
+
+            elements.append(Spacer(1,40))
+            elements.append(
+                Paragraph("Generated by MTSE Analytics Platform",
+                          styles["Normal"])
+            )
+
+            doc.build(elements)
             buffer.seek(0)
+            return buffer
+
+        if st.button("Generate Enterprise Report"):
+            pdf_buffer = generate_pdf(df, uploaded_file.name)
 
             st.download_button(
-                label=t("Download Report",
-                        "تحميل التقرير"),
-                data=buffer,
-                file_name="MTSE_Enterprise_Report.pdf",
+                "Download PDF Report",
+                data=pdf_buffer,
+                file_name="MTSE_Report.pdf",
                 mime="application/pdf"
             )
 
-    # ================= ADMIN PANEL =================
-    if st.session_state.role == "admin":
-        st.header(t("Admin Panel",
-                    "لوحة تحكم المدير"))
+# -------------------------------------------------
+# ADMIN PANEL
+# -------------------------------------------------
 
-        users = pd.read_sql_query("SELECT username, role FROM users", conn)
-        st.dataframe(users)
+if st.session_state.role == "admin":
+    st.markdown("---")
+    st.header("Admin Panel")
 
-    if st.button(t("Logout", "تسجيل خروج")):
-        st.session_state.user = None
-        st.rerun()
+    users_df = pd.read_sql("SELECT username, role FROM users", conn)
+    st.dataframe(users_df)
