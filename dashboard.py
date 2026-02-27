@@ -223,7 +223,11 @@ if st.session_state.role == "admin":
     st.subheader("Create User")
 
     new_user = st.text_input("New Username")
-    new_pass = st.text_input("New Password", type="password")
+    new_password = st.text_input(
+    "New Password",
+    type="password",
+    key="admin_change_password_input"
+)    
     new_plan = st.selectbox("Plan", ["Starter", "Pro", "Business"])
     new_role = st.selectbox("Role", ["Analyst", "Viewer", "Marketing Manager"])
 
@@ -252,7 +256,11 @@ if st.session_state.role == "admin":
 st.markdown("---")
 st.subheader("Change Password")
 
-new_password = st.text_input("New Password", type="password")
+create_password = st.text_input(
+    "New Password",
+    type="password",
+    key="create_user_password_input"
+)
 
 if st.button("Update Password"):
     c.execute("UPDATE users SET password=? WHERE username=?",
@@ -1190,3 +1198,4 @@ button {
 }
 </style>
 """, unsafe_allow_html=True)
+
