@@ -15,7 +15,20 @@ from bidi.algorithm import get_display
 # ==============================
 
 st.set_page_config(page_title="MTSE Marketing Engine", layout="wide")
-
+st.markdown("""
+<style>
+body {
+    direction: rtl;
+    text-align: right;
+}
+.stTextInput > div > div > input {
+    text-align: right;
+}
+.stTextArea textarea {
+    text-align: right;
+}
+</style>
+""", unsafe_allow_html=True)
 PLATFORM_NAME = "MTSE Marketing Engine"
 ADMIN_DEFAULT_PASSWORD = "admin@2026"
 
@@ -1200,6 +1213,7 @@ button {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 
