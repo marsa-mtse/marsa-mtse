@@ -1213,6 +1213,43 @@ button {
 }
 </style>
 """, unsafe_allow_html=True)
+# ==========================================
+# QUICK AI BLOCK (Safe Version)
+# ==========================================
+
+if "df" in locals():
+
+    st.markdown("---")
+    st.subheader("AI Quick Analysis")
+
+    numeric_cols = df.select_dtypes(include=['int64','float64']).columns
+
+    if len(numeric_cols) > 0:
+
+        st.write("Executive Summary:")
+
+        for col in numeric_cols:
+            avg = df[col].mean()
+            st.write(f"{col} average = {round(avg,2)}")
+
+        st.write("")
+
+        st.write("Strategic Insight:")
+
+        for col in numeric_cols:
+            if df[col].mean() < df[col].max() * 0.5:
+                st.write(f"- Improve {col}")
+            else:
+                st.write(f"- Scale {col}")
+
+        st.write("")
+        st.write("30/60/90 Plan:")
+        st.write("30 Days → Optimize weak metrics")
+        st.write("60 Days → Scale strong metrics")
+        st.write("90 Days → Automate & expand")
+
+    else:
+        st.write("No numeric data detected for AI analysis.")
 
 
 
