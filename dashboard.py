@@ -474,20 +474,36 @@ def format_arabic(text):
     reshaped_text = arabic_reshaper.reshape(text)
     return get_display(reshaped_text)
 def generate_enterprise_pdf(df=None, strategy_text="", username="User", filename="File"):
-    pdfmetrics.registerFont(TTFont('Amiri', 'Amiri-Regular.ttf'))
-   buffer = io.BytesIO()
-styles = getSampleStyleSheet()
 
-arabic_style = ParagraphStyle(
-    'ArabicStyle',
-    parent=styles['Normal'],
-    fontName='Amiri',
-    fontSize=12,
-    leading=18,
-    alignment=2
- doc = SimpleDocTemplate(buffer, pagesize=A4)
+    pdfmetrics.registerFont(TTFont('Amiri', 'Amiri-Regular.ttf'))
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
 
+    styles = getSampleStyleSheet()
+
+    arabic_style = ParagraphStyle(
+        'ArabicStyle',
+        parent=styles['Normal'],
+        fontName='Amiri',
+        fontSize=12,
+        leading=18,
+        alignment=2
+    )
+
+    english_style = styles['Normal']
+
+    elements.append(Paragraph("MTSE Marketing Engine", english_style))
+    elements.append(Spacer(1, 12))
+
+    if strategy_text:
+        elements.append(Paragraph(format_arabic(strategy_text), arabic_style))
+
+    doc.build(elements)
+
+    buffer.seek(0)
+    return buffer
     
        
 
@@ -1256,6 +1272,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
