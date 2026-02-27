@@ -1,186 +1,200 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import numpy as np
-import sqlite3
-import hashlib
+import plotly.express as px
 from sklearn.linear_model import LinearRegression
-from fpdf import FPDF
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from datetime import datetime
+import os
 
-# =========================================
-# DATABASE SETUP
-# =========================================
-conn = sqlite3.connect("mtse.db", check_same_thread=False)
-c = conn.cursor()
+# ----------------------------
+# CONFIG
+# ----------------------------
+st.set_page_config(page_title="MTSE Analytics", layout="wide")
 
-c.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    username TEXT PRIMARY KEY,
-    password TEXT,
-    plan TEXT
-)
-""")
-conn.commit()
-
-# =========================================
-# PAGE CONFIG
-# =========================================
-st.set_page_config(page_title="MTSE Analytics Pro", layout="wide")
-
+# ----------------------------
+# THEME
+# ----------------------------
 st.markdown("""
 <style>
-body {background-color:#F4F1EA;}
-h1,h2,h3 {color:#2C2C2C;}
+body {background-color:#f4f4f4;}
+h1,h2,h3 {color:#2c2c2c;}
 .stButton>button {
-background-color:#A68A64;
+background:#5a5a5a;
 color:white;
-border-radius:8px;
+border-radius:6px;
+}
+section[data-testid="stSidebar"] {
+background-color:#eaeaea;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# =========================================
-# AUTH FUNCTIONS
-# =========================================
-def hash_password(p):
-    return hashlib.sha256(p.encode()).hexdigest()
+# ----------------------------
+# LOGO HEADER
+# ----------------------------
+st.markdown("""
+# 📊 MTSE Analytics  
+### Data & Marketing Analytics Platform | منصة تحليل البيانات
+""")
 
-def register_user(u, p, plan):
-    try:
-        c.execute("INSERT INTO users VALUES (?, ?, ?)",
-                  (u, hash_password(p), plan))
-        conn.commit()
-        return True
-    except:
-        return False
+# ----------------------------
+# SESSION INIT
+# ----------------------------
+if "users" not in st.session_state:
+    st.session_state.users = {
+        "admin": {"password": "Admin@2026", "plan": "Pro Max", "role": "Admin"}
+    }
 
-def login_user(u, p):
-    c.execute("SELECT * FROM users WHERE username=? AND password=?",
-              (u, hash_password(p)))
-    return c.fetchone()
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-# =========================================
-# AUTH UI
-# =========================================
-if "logged" not in st.session_state:
-    st.session_state.logged = False
+# ----------------------------
+# AUTH
+# ----------------------------
+def login():
+    st.sidebar.subheader("Login")
+    u = st.sidebar.text_input("Username")
+    p = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Login"):
+        if u in st.session_state.users and st.session_state.users[u]["password"] == p:
+            st.session_state.logged_in = True
+            st.session_state.current_user = u
+        else:
+            st.sidebar.error("Wrong Credentials")
 
-menu = st.sidebar.selectbox("الحساب", ["تسجيل دخول", "إنشاء حساب"])
+def register():
+    st.sidebar.subheader("Create Account")
+    new_u = st.sidebar.text_input("New Username")
+    new_p = st.sidebar.text_input("New Password", type="password")
+    plan = st.sidebar.selectbox("Plan", ["Starter","Pro","Pro Max"])
+    if st.sidebar.button("Register"):
+        st.session_state.users[new_u] = {"password":new_p,"plan":plan,"role":"User"}
+        st.sidebar.success("Account Created")
 
-if not st.session_state.logged:
-
-    if menu == "إنشاء حساب":
-        st.title("إنشاء حساب جديد")
-        u = st.text_input("اسم المستخدم")
-        p = st.text_input("كلمة المرور", type="password")
-        plan = st.selectbox("اختر الباقة", ["Starter", "Pro", "Business"])
-
-        if st.button("تسجيل"):
-            if register_user(u, p, plan):
-                st.success("تم إنشاء الحساب")
-            else:
-                st.error("اسم مستخدم موجود")
-
-    if menu == "تسجيل دخول":
-        st.title("تسجيل الدخول")
-        u = st.text_input("اسم المستخدم")
-        p = st.text_input("كلمة المرور", type="password")
-
-        if st.button("دخول"):
-            user = login_user(u, p)
-            if user:
-                st.session_state.logged = True
-                st.session_state.username = user[0]
-                st.session_state.plan = user[2]
-                st.success("تم تسجيل الدخول")
-            else:
-                st.error("بيانات غير صحيحة")
-
+if not st.session_state.logged_in:
+    login()
+    register()
     st.stop()
 
-# =========================================
-# MAIN APP
-# =========================================
-st.title("MTSE Analytics Pro")
-st.write(f"مرحبًا {st.session_state.username} | الباقة: {st.session_state.plan}")
+# ----------------------------
+# USER INFO
+# ----------------------------
+user = st.session_state.current_user
+plan = st.session_state.users[user]["plan"]
+role = st.session_state.users[user]["role"]
 
-uploaded = st.file_uploader("ارفع ملف CSV")
+st.success(f"Welcome {user} | Plan: {plan} | Role: {role}")
 
-if uploaded:
-    df = pd.read_csv(uploaded)
-    df.columns = df.columns.str.lower().str.strip()
+# ----------------------------
+# FILE UPLOAD
+# ----------------------------
+file = st.file_uploader("Upload CSV File", type=["csv"])
+
+if file:
+    df = pd.read_csv(file)
+    st.dataframe(df.head())
 
     numeric_cols = df.select_dtypes(include=np.number).columns
 
-    st.subheader("نظرة عامة")
-    st.dataframe(df.head())
+    if len(numeric_cols) > 0:
 
-    col1,col2,col3 = st.columns(3)
-    col1.metric("عدد الصفوف", len(df))
-    col2.metric("عدد الأعمدة", len(df.columns))
-    col3.metric("أعمدة رقمية", len(numeric_cols))
+        st.subheader("Smart Auto Analysis")
 
-    # =====================================
-    # PLAN CONTROL
-    # =====================================
-    if st.session_state.plan in ["Pro", "Business"]:
-
-        st.subheader("تحليل متقدم")
-
-        if len(numeric_cols) > 0:
-            metric = st.selectbox("اختر مؤشر", numeric_cols)
-
-            st.metric("متوسط", round(df[metric].mean(),2))
-
-            fig = px.line(df, y=metric)
-            st.plotly_chart(fig, use_container_width=True)
-
-    if st.session_state.plan == "Business":
-
-        st.subheader("التوقعات المستقبلية")
-
-        if len(numeric_cols) > 0:
-            target = st.selectbox("اختر عمود للتوقع", numeric_cols)
-
-            df["index"] = range(len(df))
-            X = df[["index"]]
-            y = df[target]
-
-            model = LinearRegression()
-            model.fit(X, y)
-
-            future = np.array(range(len(df)+5)).reshape(-1,1)
-            pred = model.predict(future)
-
-            fig = px.line(y=pred, title="Forecast")
-            st.plotly_chart(fig)
-
-    # =====================================
-    # PDF FOR ALL
-    # =====================================
-    if st.button("تحميل تقرير PDF"):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200,10, txt="MTSE Analytics Report", ln=True)
+        insights = []
 
         for col in numeric_cols:
-            pdf.cell(200,10, txt=f"{col} Avg: {round(df[col].mean(),2)}", ln=True)
+            avg = df[col].mean()
+            max_v = df[col].max()
+            min_v = df[col].min()
 
-        pdf.output("report.pdf")
+            st.write(f"### {col}")
+            st.write("Average:", round(avg,2))
+            st.write("Max:", max_v)
+            st.write("Min:", min_v)
 
-        with open("report.pdf","rb") as f:
-            st.download_button("تحميل", f, "MTSE_Report.pdf")
+            if avg > df[col].median():
+                insights.append(f"{col} performing above median.")
+            else:
+                insights.append(f"{col} below expected trend.")
 
-# =========================================
+        # Visualization
+        selected = st.selectbox("Visualize Column", numeric_cols)
+        fig = px.line(df, y=selected, title=f"{selected} Trend")
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Trend Prediction (Pro / Pro Max)
+        if plan in ["Pro","Pro Max"]:
+            st.subheader("AI Trend Prediction")
+            X = np.array(range(len(df))).reshape(-1,1)
+            y = df[selected].values
+            model = LinearRegression()
+            model.fit(X,y)
+            future = model.predict([[len(df)+1]])
+            st.write("Next Predicted Value:", round(float(future),2))
+
+        # ---------------- PDF ----------------
+        def generate_pdf():
+            name = "MTSE_Report.pdf"
+            doc = SimpleDocTemplate(name, pagesize=A4)
+            elements = []
+
+            style = ParagraphStyle(name="style", fontSize=12, textColor=colors.black)
+
+            elements.append(Paragraph("<b>MTSE Analytics Report</b>", style))
+            elements.append(Spacer(1,12))
+            elements.append(Paragraph(f"File: {file.name}", style))
+            elements.append(Spacer(1,12))
+            elements.append(Paragraph(f"Generated For: {user}", style))
+            elements.append(Spacer(1,12))
+
+            for i in insights:
+                elements.append(Paragraph(i, style))
+                elements.append(Spacer(1,6))
+
+            elements.append(Spacer(1,30))
+            elements.append(Paragraph("Powered by MTSE Analytics", style))
+
+            doc.build(elements)
+            return name
+
+        if plan in ["Pro","Pro Max"]:
+            if st.button("Generate Professional PDF"):
+                path = generate_pdf()
+                with open(path,"rb") as f:
+                    st.download_button("Download Report", f, file_name="MTSE_Report.pdf")
+
+# ----------------------------
 # ADMIN PANEL
-# =========================================
-if st.session_state.username == "admin":
-    st.markdown("---")
-    st.subheader("لوحة تحكم المدير")
+# ----------------------------
+if role == "Admin":
+    st.subheader("Admin Control Panel")
+    st.write(st.session_state.users)
 
-    c.execute("SELECT username, plan FROM users")
-    users_data = c.fetchall()
+# ----------------------------
+# PRICING
+# ----------------------------
+st.markdown("""
+---
 
-    admin_df = pd.DataFrame(users_data, columns=["Username","Plan"])
-    st.dataframe(admin_df)
+## Pricing Plans
+
+**Starter – 499 EGP / month**  
+Basic Analysis  
+
+**Pro – 1499 EGP / month**  
+AI Insights + PDF  
+
+**Pro Max – Custom**  
+Full AI + Multi User + Advanced Features  
+
+---
+
+📧 marsatouch@gmail.com  
+📱 WhatsApp Group:  
+https://chat.whatsapp.com/BepZmZWVy01EFmU6vrhjo1
+
+""")
