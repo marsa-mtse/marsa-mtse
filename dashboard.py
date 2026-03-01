@@ -23,7 +23,7 @@ def t(ar, en):
 # CONFIG
 # ==============================
 
-st.title(t("منصة MTSE للتسويق الذكي", "MTSE Marketing Engine"))
+
 st.markdown("""
 <style>
 body {
@@ -1259,6 +1259,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
