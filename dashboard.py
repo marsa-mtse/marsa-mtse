@@ -205,7 +205,7 @@ uploads_used = usage[1]
 limits = PLAN_LIMITS[st.session_state.plan]
 
 st.markdown("---")
-st.subheader("Usage")
+st.subheader(t("الاستخدام", "Usage"))
 
 col1, col2 = st.columns(2)
 col1.metric("Reports Used", f"{reports_used} / {limits['reports']}")
@@ -218,7 +218,7 @@ col2.metric("Uploads Used", f"{uploads_used} / {limits['uploads']}")
 if st.session_state.role == "admin":
 
     st.markdown("---")
-    st.header("Admin Panel")
+    st.header(t("لوحة الإدارة", "Admin Panel"))
 
     st.subheader("All Users")
 
@@ -387,7 +387,7 @@ else:
 # ===================================
 
 st.markdown("---")
-st.header("Marketing Strategy Generator")
+st.header(t("Marketing Strategy Generator"))
 
 strategy_output = ""
 
@@ -897,11 +897,11 @@ def generate_ai_strategy(df=None, dataset_type="Generic"):
 # ==============================
 
 st.markdown("---")
-st.header("AI Strategic Intelligence")
+st.header(t("التحليل الاستراتيجي بالذكاء الاصطناعي", "AI Strategic Analysis"))
 
 if 'df' in locals() and df is not None:
 
-    if st.button("Generate AI Full Marketing Strategy"):
+    if st.button(t("إنشاء استراتيجية تسويقية كاملة بالذكاء الاصطناعي", "Generate AI Full Marketing Strategy")):
 
         ai_output = generate_ai_strategy(df, dataset_type)
 
@@ -1252,6 +1252,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
