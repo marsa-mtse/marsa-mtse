@@ -229,12 +229,6 @@ if st.session_state.role == "admin":
     st.header(t("لوحة الإدارة", "Admin Panel"))
 
     st.subheader(t("جميع المستخدمين", "All Users"))
-if st.session_state.role == "admin":
-
-    st.markdown("---")
-    st.header(t("لوحة الإدارة", "Admin Panel"))
-
-    st.subheader(t("جميع المستخدمين", "All Users"))
 
     users_df = c.execute("SELECT username, role, plan FROM users").fetchall()
 
@@ -1242,6 +1236,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
