@@ -194,7 +194,9 @@ if not st.session_state.logged_in:
 # USER DASHBOARD (After Login)
 # ==========================================================
 
-st.success(f"Welcome {st.session_state.username}")
+st.success(
+    t("مرحباً", "Welcome") + " " + st.session_state.username
+)
 st.write(t("الدور", "Role") + ":", st.session_state.role)
 st.write(t("الخطة", "Plan") + ":", st.session_state.plan)
 # ==============================
@@ -215,8 +217,8 @@ st.subheader(t("الاستخدام", "Usage"))
 
 col1, col2 = st.columns(2)
 col1.metric("Reports Used", f"{reports_used} / {limits['reports']}")
-col2.metric("Uploads Used", f"{uploads_used} / {limits['uploads']}")
-
+st.metric(t("عدد الرفعات", "Uploads Used"), ...)
+st.metric(t("عدد التقارير", "Reports Used"), ...)
 # ==============================
 # ADMIN PANEL
 # ==============================
@@ -226,14 +228,14 @@ if st.session_state.role == "admin":
     st.markdown("---")
     st.header(t("لوحة الإدارة", "Admin Panel"))
 
-    st.subheader("All Users")
+st.subheader(t("جميع المستخدمين", "All Users"))
 
     users_df = c.execute("SELECT username, role, plan FROM users").fetchall()
 
     for u in users_df:
         st.write(u)
 
-    st.subheader("Create User")
+  st.subheader(t("إنشاء مستخدم", "Create User"))
 
     new_user = st.text_input("New Username")
     new_password = st.text_input(
@@ -267,7 +269,7 @@ if st.session_state.role == "admin":
 # ==============================
 
 st.markdown("---")
-st.subheader("Change Password")
+st.subheader(t("تغيير كلمة المرور", "Change Password"))
 
 create_password = st.text_input(
     "New Password",
@@ -462,7 +464,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 # ==============================
 
 st.markdown("---")
-st.header("Enterprise Report")
+st.subheader(t("تقرير المؤسسات", "Enterprise Report"))
 
 report_language = st.selectbox(
     "Report Language",
@@ -656,7 +658,7 @@ if 'uploaded_file' in locals() and uploaded_file:
 # ==============================
 
 st.markdown("---")
-st.header("My Reports Archive")
+st.subheader(t("أرشيف تقاريري", "My Reports Archive"))
 
 user_reports = c.execute(
     "SELECT id, file_name, created_at FROM reports WHERE username=?",
@@ -721,7 +723,7 @@ conn.commit()
 if st.session_state.role == "admin":
 
     st.markdown("---")
-    st.header("System Activity Log")
+st.subheader(t("سجل نشاط النظام", "System Activity Log"))
 
     logs = c.execute("""
         SELECT username, action, timestamp 
@@ -740,7 +742,7 @@ if st.session_state.role == "admin":
 if st.session_state.role == "admin":
 
     st.markdown("---")
-    st.header("Plan Management")
+  st.subheader(t("إدارة الخطط", "Plan Management"))
 
     all_users = c.execute("SELECT username, plan FROM users").fetchall()
 
@@ -809,7 +811,7 @@ st.plotly_chart(fig_usage, use_container_width=True)
 # ==============================
 
 st.markdown("---")
-st.header("Subscription Status")
+st.subheader(t("حالة الاشتراك", "Subscription Status"))
 
 c.execute("SELECT billing_status, expiry_date FROM users WHERE username=?",
           (st.session_state.username,))
@@ -997,7 +999,7 @@ conn.commit()
 # ==============================
 
 st.markdown("---")
-st.header("Subscription Billing")
+st.subheader(t("الفواتير والاشتراك", "Subscription Billing"))
 
 PLAN_PRICING = {
     "Starter": 29,
@@ -1044,7 +1046,7 @@ else:
 # ==============================
 
 st.markdown("---")
-st.header("Team Management")
+st.subheader(t("إدارة الفريق", "Team Management"))
 
 if st.session_state.role == "admin":
 
@@ -1129,7 +1131,7 @@ conn.commit()
 # ==============================
 
 st.markdown("---")
-st.header("Mini CRM System")
+st.subheader(t("نظام إدارة العملاء", "Mini CRM System"))
 
 lead_name = st.text_input("Lead Name")
 lead_email = st.text_input("Lead Email")
@@ -1258,6 +1260,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
