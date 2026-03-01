@@ -731,7 +731,7 @@ if st.session_state.role == "admin":
     st.markdown("---")
 st.subheader(t("سجل نشاط النظام", "System Activity Log"))
 
-    logs = c.execute("""
+logs = c.execute("""
         SELECT username, action, timestamp 
         FROM activity_log
         ORDER BY timestamp DESC
@@ -1266,6 +1266,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
