@@ -31,7 +31,26 @@ body {
 """, unsafe_allow_html=True)
 PLATFORM_NAME = "MTSE Marketing Engine"
 ADMIN_DEFAULT_PASSWORD = "admin@2026"
+# ==============================
+# LANGUAGE SYSTEM
+# ==============================
 
+if "lang" not in st.session_state:
+    st.session_state.lang = "AR"
+
+col1, col2, col3 = st.columns([6,1,1])
+
+with col2:
+    if st.button("🇪🇬 عربي"):
+        st.session_state.lang = "AR"
+
+with col3:
+    if st.button("🇺🇸 English"):
+        st.session_state.lang = "EN"
+
+
+def t(ar, en):
+    return ar if st.session_state.lang == "AR" else en
 # ==============================
 # PREMIUM STYLE
 # ==============================
@@ -1233,6 +1252,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
