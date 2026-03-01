@@ -727,16 +727,16 @@ conn.commit()
 # ==============================
 
 if st.session_state.role == "admin":
-st.markdown("---")
-st.subheader(t("إدارة الخطة", "Plan Management"))
-
-current_plan = st.session_state.plan
-st.write(t("الخطة الحالية:", "Current Plan:"), current_plan)
-
-new_plan = st.selectbox(
-    t("اختر خطة جديدة", "Choose New Plan"),
-    ["Starter", "Pro", "Business"]
-)
+    st.markdown("---")
+    st.subheader(t("إدارة الخطة", "Plan Management"))
+    
+    current_plan = st.session_state.plan
+    st.write(t("الخطة الحالية:", "Current Plan:"), current_plan)
+    
+    new_plan = st.selectbox(
+        t("اختر خطة جديدة", "Choose New Plan"),
+        ["Starter", "Pro", "Business"]
+    )
 
 if st.button(t("تحديث الخطة", "Update Plan")):
     c.execute("UPDATE users SET plan=? WHERE username=?",
@@ -1242,6 +1242,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
