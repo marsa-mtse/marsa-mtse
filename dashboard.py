@@ -232,8 +232,8 @@ st.subheader(t("جميع المستخدمين", "All Users"))
 
 users_df = c.execute("SELECT username, role, plan FROM users").fetchall()
 
-    for u in users_df:
-        st.write(u)
+for u in users_df:
+    st.write(u)
 
   st.subheader(t("إنشاء مستخدم", "Create User"))
 
@@ -1260,6 +1260,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
