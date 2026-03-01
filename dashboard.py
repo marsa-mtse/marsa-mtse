@@ -228,14 +228,20 @@ if st.session_state.role == "admin":
     st.markdown("---")
     st.header(t("لوحة الإدارة", "Admin Panel"))
 
-st.subheader(t("جميع المستخدمين", "All Users"))
+    st.subheader(t("جميع المستخدمين", "All Users"))
+if st.session_state.role == "admin":
 
-users_df = c.execute("SELECT username, role, plan FROM users").fetchall()
+    st.markdown("---")
+    st.header(t("لوحة الإدارة", "Admin Panel"))
 
-for u in users_df:
-    st.write(u)
+    st.subheader(t("جميع المستخدمين", "All Users"))
 
-  st.subheader(t("إنشاء مستخدم", "Create User"))
+    users_df = c.execute("SELECT username, role, plan FROM users")).fetchall()
+
+    for u in users_df:
+        st.write(u)
+
+    st.subheader(t("إنشاء مستخدم", "Create User"))
 
     new_user = st.text_input("New Username")
     new_password = st.text_input(
@@ -1260,6 +1266,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
