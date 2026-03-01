@@ -23,7 +23,7 @@ def t(ar, en):
 # CONFIG
 # ==============================
 
-st.set_page_config(page_title="MTSE Marketing Engine", layout="wide")
+st.title(t("منصة MTSE للتسويق الذكي", "MTSE Marketing Engine"))
 st.markdown("""
 <style>
 body {
@@ -170,7 +170,7 @@ PLAN_LIMITS = {
 
 if not st.session_state.logged_in:
 
-    st.subheader("Login")
+st.subheader(t("تسجيل الدخول", "Login"))
 
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
@@ -295,7 +295,7 @@ import plotly.express as px
 # ==============================
 
 st.markdown("---")
-st.header("Data Upload")
+st.header(t("رفع البيانات", "Data Upload"))
 
 if uploads_used >= limits["uploads"]:
     st.error("Upload limit reached for your plan.")
@@ -433,7 +433,7 @@ st.text_area("Strategic Recommendations", strategy_output, height=200)
 # ===================================
 
 st.markdown("---")
-st.header("Smart Strategy Assistant")
+st.header(t("المساعد الاستراتيجي الذكي", "Smart Strategy Assistant"))
 
 user_question = st.text_input("Ask about your data", key="chat_input")
 
@@ -1260,6 +1260,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
