@@ -195,9 +195,8 @@ if not st.session_state.logged_in:
 # ==========================================================
 
 st.success(f"Welcome {st.session_state.username}")
-st.write(f"Role: {st.session_state.role}")
-st.write(f"Plan: {st.session_state.plan}")
-
+st.write(t("الدور", "Role") + ":", st.session_state.role)
+st.write(t("الخطة", "Plan") + ":", st.session_state.plan)
 # ==============================
 # USAGE DISPLAY
 # ==============================
@@ -1259,6 +1258,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
