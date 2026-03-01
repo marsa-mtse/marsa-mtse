@@ -1075,7 +1075,7 @@ if st.session_state.role == "admin":
 # ==============================
 
 st.markdown("---")
-st.header("White Label Mode")
+st.subheader(t("وضع العلامة البيضاء", "White Label Mode"))
 
 white_label_name = st.text_input("Brand Name")
 white_label_logo = st.file_uploader("Upload Logo", type=["png","jpg"])
@@ -1198,7 +1198,7 @@ if st.button("Generate Invoice"):
 # ==============================
 
 st.markdown("---")
-st.header("Email Campaign Simulation")
+st.subheader(t("محاكاة حملات البريد", "Email Campaign Simulation"))
 
 email_subject = st.text_input("Subject")
 email_body = st.text_area("Email Content")
@@ -1260,6 +1260,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
