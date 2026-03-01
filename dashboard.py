@@ -216,9 +216,16 @@ st.markdown("---")
 st.subheader(t("الاستخدام", "Usage"))
 
 col1, col2 = st.columns(2)
-col1.metric("Reports Used", f"{reports_used} / {limits['reports']}")
-st.metric(t("عدد الرفعات", "Uploads Used"), ...)
-st.metric(t("عدد التقارير", "Reports Used"), ...)
+
+col1.metric(
+    t("عدد التقارير المستخدمة", "Reports Used"),
+    f"{reports_used} / {limits['reports']}"
+)
+
+col2.metric(
+    t("عدد مرات الرفع المستخدمة", "Uploads Used"),
+    f"{uploads_used} / {limits['uploads']}"
+)
 # ==============================
 # ADMIN PANEL
 # ==============================
@@ -1236,6 +1243,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
