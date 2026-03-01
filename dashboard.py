@@ -10,14 +10,15 @@ import datetime
 import io
 import arabic_reshaper
 from bidi.algorithm import get_display
+
 # ================================
 # LANGUAGE SYSTEM
 # ================================
 if "lang" not in st.session_state:
-    st.session_state.lang = "ar"
+    st.session_state.lang = "Ar"
 
 def t(ar, en):
-    return ar if st.session_state.lang == "ar" else en
+    return ar if st.session_state.lang == "Ar" else en
 # ==============================
 # CONFIG
 # ==============================
@@ -37,7 +38,7 @@ body {
 }
 </style>
 """, unsafe_allow_html=True)
-PLATFORM_NAME = "MTSE Marketing Engine"
+PLATFORM_NAME = t("منصة MTSE للتسويق", "MTSE Marketing Engine")
 ADMIN_DEFAULT_PASSWORD = "admin@2026"
 # ==============================
 # LANGUAGE SYSTEM
@@ -57,8 +58,7 @@ with col3:
         st.session_state.lang = "EN"
 
 
-def t(ar, en):
-    return ar if st.session_state.lang == "AR" else en
+
 # ==============================
 # PREMIUM STYLE
 # ==============================
@@ -1260,6 +1260,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
