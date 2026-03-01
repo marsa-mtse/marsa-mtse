@@ -36,32 +36,6 @@ ADMIN_DEFAULT_PASSWORD = "admin@2026"
 # PREMIUM STYLE
 # ==============================
 
-st.markdown("""
-<style>
-.stApp {
-    background: linear-gradient(to right, #0f172a, #1e293b);
-    color: white;
-}
-h1, h2, h3 {
-    color: #facc15;
-}
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.watermark {
-    position: fixed;
-    top: 40%;
-    left: 25%;
-    font-size: 80px;
-    color: rgba(255,255,255,0.04);
-    transform: rotate(-30deg);
-    z-index: -1;
-}
-</style>
-<div class="watermark">MTSE Marketing Engine</div>
-""", unsafe_allow_html=True)
 
 # ==============================
 # LOGO HEADER
@@ -1221,20 +1195,7 @@ if custom_domain:
 # PREMIUM UI ENHANCEMENT
 # ==============================
 
-st.markdown("""
-<style>
-button {
-    background-color: #facc15 !important;
-    color: black !important;
-    font-weight: bold;
-    border-radius: 8px;
-}
-.stTextInput > div > div > input {
-    background-color: #1e293b;
-    color: white;
-}
-</style>
-""", unsafe_allow_html=True)
+
 # ==========================================
 # QUICK AI BLOCK (Safe Version)
 # ==========================================
@@ -1272,6 +1233,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
