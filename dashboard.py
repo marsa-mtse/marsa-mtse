@@ -230,7 +230,7 @@ if st.session_state.role == "admin":
 
 st.subheader(t("جميع المستخدمين", "All Users"))
 
-    users_df = c.execute("SELECT username, role, plan FROM users").fetchall()
+users_df = c.execute("SELECT username, role, plan FROM users").fetchall()
 
     for u in users_df:
         st.write(u)
@@ -1260,6 +1260,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
