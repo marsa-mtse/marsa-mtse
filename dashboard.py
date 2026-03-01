@@ -387,7 +387,7 @@ else:
 # ===================================
 
 st.markdown("---")
-st.header(t("Marketing Strategy Generator"))
+st.header("مولد الاستراتيجية التسويقية")
 
 strategy_output = ""
 
@@ -1252,6 +1252,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
