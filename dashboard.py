@@ -10,6 +10,14 @@ import datetime
 import io
 import arabic_reshaper
 from bidi.algorithm import get_display
+# ================================
+# LANGUAGE SYSTEM
+# ================================
+if "lang" not in st.session_state:
+    st.session_state.lang = "ar"
+
+def t(ar, en):
+    return ar if st.session_state.lang == "ar" else en
 # ==============================
 # CONFIG
 # ==============================
@@ -1252,6 +1260,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
