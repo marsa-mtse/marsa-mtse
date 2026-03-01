@@ -170,12 +170,12 @@ PLAN_LIMITS = {
 
 if not st.session_state.logged_in:
 
-st.subheader(t("تسجيل الدخول", "Login"))
+    st.subheader(t("تسجيل الدخول", "Login"))
 
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+    username = st.text_input(t("اسم المستخدم", "Username"))
+    password = st.text_input(t("كلمة المرور", "Password"), type="password")
 
-    if st.button("Login"):
+    if st.button(t("دخول", "Login")):
         c.execute("SELECT * FROM users WHERE username=?", (username,))
         user = c.fetchone()
 
@@ -184,8 +184,7 @@ st.subheader(t("تسجيل الدخول", "Login"))
             st.session_state.username = user[0]
             st.session_state.role = user[2]
             st.session_state.plan = user[3]
-            st.success("Login Successful")
-            st.rerun()
+            st.success(t("تم تسجيل الدخول بنجاح", "Login Successful"))
         else:
             st.error("Invalid Credentials")
 
@@ -1260,6 +1259,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
