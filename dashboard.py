@@ -727,46 +727,22 @@ conn.commit()
 # ==============================
 
 if st.session_state.role == "admin":
+st.markdown("---")
+st.subheader(t("إدارة الخطة", "Plan Management"))
 
-    st.markdown("---")
-st.subheader(t("سجل نشاط النظام", "System Activity Log"))
+current_plan = st.session_state.plan
+st.write(t("الخطة الحالية:", "Current Plan:"), current_plan)
 
-logs = c.execute("""
-        SELECT username, action, timestamp 
-        FROM activity_log
-        ORDER BY timestamp DESC
-        LIMIT 20
-    """).fetchall()
+new_plan = st.selectbox(
+    t("اختر خطة جديدة", "Choose New Plan"),
+    ["Starter", "Pro", "Business"]
+)
 
-for log in logs:
-        st.write(f"{log[2]} | {log[0]} → {log[1]}")
-
-# ==============================
-# ADMIN – PLAN MANAGEMENT
-# ==============================
-
-if st.session_state.role == "admin":
-
-    st.markdown("---")
-  st.subheader(t("إدارة الخطط", "Plan Management"))
-
-    all_users = c.execute("SELECT username, plan FROM users").fetchall()
-
-    for user in all_users:
-        col1, col2 = st.columns([2,2])
-        col1.write(user[0])
-        new_plan = col2.selectbox(
-            f"Plan for {user[0]}",
-            ["Starter", "Pro", "Business"],
-            key=f"plan_{user[0]}"
-        )
-
-        if st.button(f"Update Plan {user[0]}"):
-            c.execute("UPDATE users SET plan=? WHERE username=?",
-                      (new_plan, user[0]))
-            conn.commit()
-            st.success(f"Plan updated for {user[0]}")
-
+if st.button(t("تحديث الخطة", "Update Plan")):
+    c.execute("UPDATE users SET plan=? WHERE username=?",
+              (new_plan, st.session_state.username))
+    conn.commit()
+    st.success(t("تم تحديث الخطة", "Plan updated successfully"))
 # ==============================
 # ARCHIVE DOWNLOAD FROM DB
 # ==============================
@@ -1266,6 +1242,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
