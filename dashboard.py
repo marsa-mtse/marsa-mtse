@@ -738,7 +738,7 @@ logs = c.execute("""
         LIMIT 20
     """).fetchall()
 
-    for log in logs:
+for log in logs:
         st.write(f"{log[2]} | {log[0]} → {log[1]}")
 
 # ==============================
@@ -1266,6 +1266,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
