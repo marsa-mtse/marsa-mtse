@@ -749,7 +749,7 @@ if st.button(t("تحديث الخطة", "Update Plan")):
 # ==============================
 
 st.markdown("---")
-st.header("Download Archived Reports")
+st.header(t("تحميل التقارير المؤرشفة", "Download Archived Reports"))
 
 archived_reports = c.execute("""
     SELECT id, file_name, pdf_data
@@ -774,7 +774,7 @@ for report in archived_reports:
 # ==============================
 
 st.markdown("---")
-st.header("Usage Analytics")
+st.header(t("تحليلات الاستخدام", "Usage Analytics"))
 
 usage_data = {
     "Reports Used": reports_used,
@@ -811,7 +811,7 @@ st.write("Expiry Date:", expiry_date if expiry_date else "Not Set")
 # ==============================
 
 st.markdown("---")
-st.header("Upgrade Plan (Simulation)")
+st.header(t("ترقية الباقة (محاكاة)", "Upgrade Plan (Simulation)"))
 
 upgrade_plan = st.selectbox("Choose Plan", ["Starter", "Pro", "Business"])
 
@@ -915,7 +915,7 @@ if 'df' in locals() and df is not None:
 # ==============================
 
 st.markdown("---")
-st.header("AI Chat Assistant (Advanced)")
+st.header(t("مساعد الذكاء الاصطناعي (متقدم)", "AI Chat Assistant (Advanced)"))
 
 chat_input = st.text_input("Ask the AI about your marketing data")
 
@@ -1043,7 +1043,7 @@ if st.session_state.role == "admin":
         conn.commit()
         st.success("Team Created")
 
-    st.subheader("Assign User to Company")
+    st.header(t("تعيين مستخدم لشركة", "Assign User to Company"))
 
     assign_user = st.text_input("Username to Assign")
 
@@ -1144,7 +1144,7 @@ for lead in leads:
 # ==============================
 
 st.markdown("---")
-st.header("Invoice Generator")
+st.header(t("مولد الفواتير", "Invoice Generator"))
 
 invoice_client = st.text_input("Client Name")
 invoice_amount = st.number_input("Amount", min_value=0)
@@ -1194,7 +1194,7 @@ if st.button("Simulate Send Email"):
 # ==============================
 
 st.markdown("---")
-st.header("White Label Domain Settings")
+st.header(t("إعدادات الدومين المخصص", "White Label Domain Settings"))
 
 custom_domain = st.text_input("Custom Domain")
 
@@ -1243,6 +1243,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
