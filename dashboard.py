@@ -10,6 +10,22 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+with st.sidebar:
+    st.markdown("## 🚀 MTSE")
+    st.markdown("---")
+
+    page = st.radio(
+        "Navigation",
+        [
+            "🏠 Dashboard",
+            "📊 Analytics",
+            "🤖 AI Engine",
+            "📁 Reports",
+            "👥 Users",
+            "💳 Billing",
+            "⚙ Settings"
+        ]
+    )
 import sqlite3
 import hashlib
 import datetime
@@ -1249,6 +1265,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
