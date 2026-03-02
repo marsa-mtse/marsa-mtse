@@ -12,6 +12,11 @@ st.set_page_config(
 )
 from pages import dashboard_page
 from pages import analytics_page
+from pages import ai_engine_page
+from pages import reports_page
+from pages import users_page
+from pages import billing_page
+from pages import settings_page
 with st.sidebar:
     st.markdown("## 🚀 MTSE")
     st.markdown("### Navigation")
@@ -37,6 +42,16 @@ if page == "Dashboard":
     dashboard_page.render()
 elif page == "Analytics":
     analytics_page.render()
+    elif page == "AI Engine":
+    ai_engine_page.render()
+elif page == "Reports":
+    reports_page.render()
+elif page == "Users":
+    users_page.render()
+elif page == "Billing":
+    billing_page.render()
+elif page == "Settings":
+    settings_page.render()
    
 
 
@@ -1300,6 +1315,7 @@ elif page == "Billing":
 
 elif page == "Settings":
     st.title("Settings")
+
 
 
 
