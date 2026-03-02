@@ -12,20 +12,25 @@ st.set_page_config(
 )
 with st.sidebar:
     st.markdown("## 🚀 MTSE")
+    st.markdown("### Navigation")
     st.markdown("---")
 
-    page = st.radio(
-        "Navigation",
-        [
-            "🏠 Dashboard",
-            "📊 Analytics",
-            "🤖 AI Engine",
-            "📁 Reports",
-            "👥 Users",
-            "💳 Billing",
-            "⚙ Settings"
-        ]
-    )
+    if "page" not in st.session_state:
+        st.session_state.page = "Dashboard"
+
+    def nav_button(label, icon):
+        if st.button(f"{icon}  {label}", use_container_width=True):
+            st.session_state.page = label
+
+    nav_button("Dashboard", "🏠")
+    nav_button("Analytics", "📊")
+    nav_button("AI Engine", "🤖")
+    nav_button("Reports", "📁")
+    nav_button("Users", "👥")
+    nav_button("Billing", "💳")
+    nav_button("Settings", "⚙")
+
+    page = st.session_state.page
 import sqlite3
 import hashlib
 import datetime
@@ -1266,6 +1271,26 @@ if "df" in locals():
     else:
         st.write("No numeric data detected for AI analysis.")
 
+if page == "Dashboard":
+    st.title("Dashboard")
+
+elif page == "Analytics":
+    st.title("Analytics")
+
+elif page == "AI Engine":
+    st.title("AI Engine")
+
+elif page == "Reports":
+    st.title("Reports")
+
+elif page == "Users":
+    st.title("Users")
+
+elif page == "Billing":
+    st.title("Billing")
+
+elif page == "Settings":
+    st.title("Settings")
 
 
 
