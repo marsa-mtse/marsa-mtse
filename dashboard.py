@@ -11,6 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 from pages import dashboard_page
+from pages import analytics_page
 with st.sidebar:
     st.markdown("## 🚀 MTSE")
     st.markdown("### Navigation")
@@ -34,6 +35,8 @@ with st.sidebar:
 
 if page == "Dashboard":
     dashboard_page.render()
+    elif page == "Analytics":
+    analytics_page.render()
    
 
 
@@ -1297,6 +1300,7 @@ elif page == "Billing":
 
 elif page == "Settings":
     st.title("Settings")
+
 
 
 
