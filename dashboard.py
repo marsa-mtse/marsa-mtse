@@ -35,7 +35,7 @@ with st.sidebar:
 
 if page == "Dashboard":
     dashboard_page.render()
-    elif page == "Analytics":
+elif page == "Analytics":
     analytics_page.render()
    
 
@@ -1300,6 +1300,7 @@ elif page == "Billing":
 
 elif page == "Settings":
     st.title("Settings")
+
 
 
 
