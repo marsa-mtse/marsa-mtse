@@ -4,6 +4,12 @@
 # ==========================================================
 
 import streamlit as st
+st.set_page_config(
+    page_title="MTSE Marketing Engine",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 import sqlite3
 import hashlib
 import datetime
@@ -1243,6 +1249,7 @@ if "df" in locals():
 
     else:
         st.write("No numeric data detected for AI analysis.")
+
 
 
 
