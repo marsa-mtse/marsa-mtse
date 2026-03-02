@@ -10,6 +10,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+from pages import dashboard_page
 with st.sidebar:
     st.markdown("## 🚀 MTSE")
     st.markdown("### Navigation")
@@ -29,39 +30,13 @@ with st.sidebar:
     nav_button("Users", "👥")
     nav_button("Billing", "💳")
     nav_button("Settings", "⚙")
-
     page = st.session_state.page
-    # =============================
-# PAGE ROUTER
-# =============================
 
 if page == "Dashboard":
-    st.title("📊 Dashboard")
-    st.write("Main overview and KPIs")
+    dashboard_page.render()
+   
 
-elif page == "Analytics":
-    st.title("📈 Analytics")
-    st.write("Advanced analytics and charts")
 
-elif page == "AI Engine":
-    st.title("🤖 AI Engine")
-    st.write("AI strategy and automation tools")
-
-elif page == "Reports":
-    st.title("📁 Reports")
-    st.write("Generate and download reports")
-
-elif page == "Users":
-    st.title("👥 Users Management")
-    st.write("Manage users and roles")
-
-elif page == "Billing":
-    st.title("💳 Billing")
-    st.write("Subscriptions and payments")
-
-elif page == "Settings":
-    st.title("⚙ Settings")
-    st.write("System configuration")
 import sqlite3
 import hashlib
 import datetime
@@ -1322,6 +1297,7 @@ elif page == "Billing":
 
 elif page == "Settings":
     st.title("Settings")
+
 
 
 
